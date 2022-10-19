@@ -91,11 +91,11 @@ def identify_arch(image_id):
 
 def make_image(arch, image_id):
     print ("[+] Building QEMU disk image...")
-    makeimage_cmd = os.path.join(firmadyne_path, "scripts/makeImage.sh")
+    makeimage_cmd = os.path.join(firmadyne_path, "scripts/makeImage-non-privileged.sh")
     makeimage_args = ["--", makeimage_cmd, image_id, arch]
     child = pexpect.spawn("sudo", makeimage_args, cwd=firmadyne_path)
     child.sendline(sudo_pass)
-    child.expect_exact(pexpect.EOF)
+    child.expect_exact(pexpect.EOF, timeout=None)
 
 
 def infer_network(arch, image_id, qemu_dir):
