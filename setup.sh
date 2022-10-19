@@ -21,7 +21,7 @@ cd ..
 
 echo "Installing firmadyne"
 # tested with firmadyne commit bcd8bc0
-git clone --recursive https://github.com/firmadyne/firmadyne.git
+git clone --recursive https://github.com/AttifyOS/firmadyne.git
 cd firmadyne
 ./download.sh
 firmadyne_dir=$(realpath .)
