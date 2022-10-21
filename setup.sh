@@ -39,7 +39,7 @@ cd ..
 # mknod fails in non-privileged containers and as a result when extracting a squashfs file binwalk creates two
 # directories - squashfs-root & squashfs-root-0 which breaks the rootfs detection logic in io_find_rootfs
 # This patch ignores the second squashfs-root-0 directory
-sed -i 's/while (len(os.listdir(path)) == 1 and/while (len(os.listdir(path)) <= 2 and/' ./sources/extractor/extractor.py
+sed -i 's/while (len(os.listdir(path)) == 1 and/while (len(os.listdir(path)) in (1, 2) and/' ./sources/extractor/extractor.py
 
 echo "Setting up firmware analysis toolkit"
 chmod +x fat.py
