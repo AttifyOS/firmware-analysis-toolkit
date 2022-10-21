@@ -121,7 +121,7 @@ def final_run(image_id, arch, qemu_dir):
     if not os.path.isfile(runsh_path):
         print ("[!] Cannot emulate firmware, run.sh not generated")
         return
-    
+
     if qemu_dir:
         if arch == "armel":
             arch = "arm"
