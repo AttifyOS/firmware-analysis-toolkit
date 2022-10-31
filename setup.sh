@@ -37,8 +37,26 @@ sed -i 's/env python/env python3/' ./sources/extractor/extractor.py ./scripts/ma
 
 # mknod fails in non-privileged containers and as a result when extracting a squashfs file binwalk creates two
 # directories - squashfs-root & squashfs-root-0 which breaks the rootfs detection logic in io_find_rootfs
-# This patch ignores the second squashfs-root-0 directory
-sed -i 's/while (len(os.listdir(path)) == 1 and/while (len(os.listdir(path)) in (1, 2) and/' ./sources/extractor/extractor.py
+# This patch ignores directory having names of type squashfs-root-0, squashfs-root-1 etc
+patch -p0 ./sources/extractor/extractor.py <<EOF
+143,144c143,154
+<         while (len(os.listdir(path)) == 1 and
+<                os.path.isdir(os.path.join(path, os.listdir(path)[0]))):
+---
+>         def should_recurse_into(pth):
+>             subpaths = os.listdir(path)
+>             if (len(subpaths) == 1 and 
+>                 os.path.isdir(os.path.join(path, subpaths[0]))):
+>                 return True
+>             elif len(subpaths) > 1 :
+>                 # The subdirectories are of the form squashfs-root, squashfs-root-0
+>                 return os.path.commonprefix(subpaths).endswith("-root")
+> 
+>             return False
+> 
+>         while should_recurse_into(path):
+
+EOF
 cd ..
 
 echo "Setting up firmware analysis toolkit"
