@@ -35,6 +35,9 @@ sed -i 's/psql/#psql/' ./scripts/getArch.sh
 # Change interpreter to python3
 sed -i 's/env python/env python3/' ./sources/extractor/extractor.py ./scripts/makeNetwork.py
 
+# Ignore unicode decode errors when reading qemu-initial-serial-log
+sed -i 's/data = open(infile).read()/data = open(infile, errors="ignore").read()/' ./scripts/makeNetwork.py
+
 # mknod fails in non-privileged containers and as a result when extracting a squashfs file binwalk creates two
 # directories - squashfs-root & squashfs-root-0 which breaks the rootfs detection logic in io_find_rootfs
 # This patch ignores directory having names of type squashfs-root-0, squashfs-root-1 etc
