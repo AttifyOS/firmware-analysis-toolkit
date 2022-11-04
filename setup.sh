@@ -42,14 +42,20 @@ sed -i 's/data = open(infile).read()/data = open(infile, errors="ignore").read()
 # directories - squashfs-root & squashfs-root-0 which breaks the rootfs detection logic in io_find_rootfs
 # This patch ignores directory having names of type squashfs-root-0, squashfs-root-1 etc
 patch -p0 ./sources/extractor/extractor.py <<EOF
-143,144c143,154
+143,145c143,167
 <         while (len(os.listdir(path)) == 1 and
 <                os.path.isdir(os.path.join(path, os.listdir(path)[0]))):
+<             path = os.path.join(path, os.listdir(path)[0])
 ---
->         def should_recurse_into(pth):
->             subpaths = os.listdir(path)
+>         # while (len(os.listdir(path)) == 1 and
+>         #        os.path.isdir(os.path.join(path, os.listdir(path)[0]))):
+>         #     print(path, os.listdir(path))
+>         #     path = os.path.join(path, os.listdir(path)[0])
+> 
+>         def _should_recurse_into(pth):
+>             subpaths = os.listdir(pth)
 >             if (len(subpaths) == 1 and 
->                 os.path.isdir(os.path.join(path, subpaths[0]))):
+>                 os.path.isdir(os.path.join(pth, subpaths[0]))):
 >                 return True
 >             elif len(subpaths) > 1 :
 >                 # The subdirectories are of the form squashfs-root, squashfs-root-0
@@ -57,7 +63,15 @@ patch -p0 ./sources/extractor/extractor.py <<EOF
 > 
 >             return False
 > 
->         while should_recurse_into(path):
+>         # Sometimes squashfs-root-0 contains the correctly extracted filesystem
+>         # than the squashfs-root directory. In such cases we follow the directory
+>         # having the larger size
+>         def _get_largest_subdir(pth):
+>             return sorted([(p, os.path.getsize(os.path.join(pth, p))) for p in os.listdir(pth)], key=lambda item:item[1])[-1][0]
+> 
+>         while _should_recurse_into(path):
+>             print(path, os.listdir(path))
+>             path = os.path.join(path, _get_largest_subdir(path))
 
 EOF
 cd ..
